@@ -22,8 +22,12 @@ func Grep(lines []string, pattern string, useRegex bool, ignoreCase bool) []stri
 		if ignoreCase {
 			flags = "(?i)"
 		}
+		// Compile regex safely, handle errors
+		re, err := regexp.Compile(flags + pattern)
+		if err != nil {
+			return result // return empty if invalid regex
+		}
 
-		re := regexp.MustCompile(flags + pattern)
 		for _, l := range lines {
 			if re.MatchString(l) {
 				result = append(result, l)
