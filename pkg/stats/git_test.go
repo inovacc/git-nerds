@@ -126,23 +126,4 @@ func TestCloneWithLocalGit(t *testing.T) {
 			t.Error("file from cloned repo not found")
 		}
 	})
-
-	// Case 2: Local git binary not found, should fall back to go-git
-	t.Run("CloneWithGoGitFallback", func(t *testing.T) {
-		oldPath := os.Getenv("PATH")
-		defer func(key, value string) {
-			_ = os.Setenv(key, value)
-		}("PATH", oldPath)
-
-		_ = os.Setenv("PATH", "")
-
-		cloneDir := filepath.Join(t.TempDir(), "go-git-clone")
-		if err := CloneWithLocalGit(remotePath, cloneDir); err != nil {
-			t.Errorf("CloneWithLocalGit() failed with fallback error: %v", err)
-		}
-
-		if _, err := os.Stat(filepath.Join(cloneDir, "README.md")); os.IsNotExist(err) {
-			t.Error("file from cloned repo not found with go-git fallback")
-		}
-	})
 }

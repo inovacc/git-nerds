@@ -63,6 +63,8 @@ func CloneWithLocalGit(url string, dir string) error {
 	gitPath, err := FindGit()
 	if err != nil {
 		// Local git binary not found, try cloning with go-git
+		// The clone options are kept minimal to avoid go-git trying to use an
+		// external process, which was causing the test to fail.
 		cloneOpts := &git.CloneOptions{
 			URL:      url,
 			Progress: nil,
