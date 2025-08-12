@@ -16,11 +16,13 @@ import (
 // Grep filtra líneas que contengan un patrón (substring o regex)
 func Grep(lines []string, pattern string, useRegex bool, ignoreCase bool) []string {
 	var result []string
+
 	if useRegex {
 		flags := ""
 		if ignoreCase {
 			flags = "(?i)"
 		}
+
 		re := regexp.MustCompile(flags + pattern)
 		for _, l := range lines {
 			if re.MatchString(l) {
@@ -43,6 +45,7 @@ func Grep(lines []string, pattern string, useRegex bool, ignoreCase bool) []stri
 			}
 		}
 	}
+
 	return result
 }
 
@@ -51,7 +54,7 @@ func Fields(line string) []string {
 	return strings.Fields(line)
 }
 
-// SplitN simula `cut` o `awk -F` con delimitador y máximo de partes
+// SplitN simula `cut o `awk -F` con delimitador y máximo de partes
 func SplitN(line, sep string, n int) []string {
 	return strings.SplitN(line, sep, n)
 }
@@ -61,37 +64,39 @@ func SortStrings(data []string) {
 	sort.Strings(data)
 }
 
-// SortByValue ordena un mapa[string]int por valor descendente
-func SortByValue(m map[string]int) []struct {
+type KeyValue struct {
 	Key   string
 	Value int
-} {
-	var kvs []struct {
-		Key   string
-		Value int
-	}
+}
+
+// SortByValue ordena un mapa[string]int por valor descendente
+func SortByValue(m map[string]int) []KeyValue {
+	var kvs = make([]KeyValue, 0)
+
 	for k, v := range m {
-		kvs = append(kvs, struct {
-			Key   string
-			Value int
-		}{k, v})
+		kvs = append(kvs, KeyValue{Key: k, Value: v})
 	}
+
 	sort.Slice(kvs, func(i, j int) bool {
 		return kvs[i].Value > kvs[j].Value
 	})
+
 	return kvs
 }
 
 // Uniq elimina duplicados preservando orden
 func Uniq(lines []string) []string {
 	seen := make(map[string]struct{})
+
 	var result []string
+
 	for _, l := range lines {
 		if _, ok := seen[l]; !ok {
 			seen[l] = struct{}{}
 			result = append(result, l)
 		}
 	}
+
 	return result
 }
 
@@ -100,6 +105,7 @@ func Head(lines []string, n int) []string {
 	if n > len(lines) {
 		return lines
 	}
+
 	return lines[:n]
 }
 
@@ -109,8 +115,8 @@ func Basename(path string) string {
 }
 
 // ReplaceAll simula `tr` de reemplazo simple
-func ReplaceAll(s, old, new string) string {
-	return strings.ReplaceAll(s, old, new)
+func ReplaceAll(s, o, n string) string {
+	return strings.ReplaceAll(s, o, n)
 }
 
 // ToLower convierte a minúsculas
@@ -124,6 +130,7 @@ func Reverse(s string) string {
 	for i, j := 0, len(runes)-1; i < j; i, j = i+1, j-1 {
 		runes[i], runes[j] = runes[j], runes[i]
 	}
+
 	return string(runes)
 }
 
@@ -133,13 +140,13 @@ func DateNow(format string) string {
 }
 
 // Printf es un wrapper de fmt.Printf
-func Printf(format string, args ...interface{}) {
-	fmt.Printf(format, args...)
+func Printf(format string, args ...any) {
+	_, _ = fmt.Fprintf(os.Stdout, format, args...)
 }
 
 // PrintColor imprime texto con color usando fatih/color (simula `tput setaf`)
-func PrintColor(c *color.Color, format string, args ...interface{}) {
-	c.Printf(format, args...)
+func PrintColor(c *color.Color, format string, args ...any) {
+	_, _ = c.Printf(format, args...)
 }
 
 // ReadLines lee un archivo línea por línea
@@ -148,12 +155,16 @@ func ReadLines(path string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer f.Close()
+	defer func(f *os.File) {
+		_ = f.Close()
+	}(f)
 
 	var lines []string
+
 	scanner := bufio.NewScanner(f)
 	for scanner.Scan() {
 		lines = append(lines, scanner.Text())
 	}
+
 	return lines, scanner.Err()
 }

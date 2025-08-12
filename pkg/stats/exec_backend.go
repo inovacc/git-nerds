@@ -17,16 +17,20 @@ func NewExecBackend(repoPath string) *ExecBackend {
 }
 
 func (b *ExecBackend) runGit(args ...string) (string, error) {
+	var (
+		out    bytes.Buffer
+		stderr bytes.Buffer
+	)
+
 	cmd := exec.Command("git", args...)
 	cmd.Dir = b.RepoPath
-	var out bytes.Buffer
-	var stderr bytes.Buffer
 	cmd.Stdout = &out
 	cmd.Stderr = &stderr
-	err := cmd.Run()
-	if err != nil {
+
+	if err := cmd.Run(); err != nil {
 		return "", fmt.Errorf("git %s: %v - %s", strings.Join(args, " "), err, stderr.String())
 	}
+
 	return out.String(), nil
 }
 

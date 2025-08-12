@@ -24,6 +24,7 @@ func NewRepo(path string) (*Repo, error) {
 func (r *Repo) RunGit(args ...string) ([]byte, error) {
 	cmd := exec.Command("git", args...)
 	cmd.Dir = r.Path
+
 	return cmd.Output()
 }
 

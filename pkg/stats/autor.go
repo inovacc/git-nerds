@@ -2,6 +2,7 @@ package stats
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/inovacc/git-nerds/pkg/unixcompat"
@@ -19,6 +20,7 @@ func CommitsPerAuthor(b Backend) error {
 
 	// Contar ocurrencias
 	counts := make(map[string]int)
+
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
 		if line != "" {
@@ -31,7 +33,8 @@ func CommitsPerAuthor(b Backend) error {
 
 	// Imprimir alineado
 	for _, kv := range sorted {
-		fmt.Printf("%-25s %d\n", kv.Key, kv.Value)
+		_, _ = fmt.Fprintf(os.Stdout, "%-25s %d\n", kv.Key, kv.Value)
 	}
+
 	return nil
 }

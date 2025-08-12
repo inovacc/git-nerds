@@ -3,6 +3,7 @@ package stats
 import (
 	"fmt"
 	"os/exec"
+	"strings"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
@@ -41,6 +42,7 @@ func OpenRepo(path string) (*git.Repository, error) {
 		if err != nil {
 			return nil, fmt.Errorf("failed to open repo with go-git: %w", err)
 		}
+
 		return repo, nil
 	}
 
@@ -61,20 +63,25 @@ func CloneWithLocalGit(url string, dir string) error {
 	gitPath, err := FindGit()
 	if err != nil {
 		// Local git binary not found, try cloning with go-git
-		_, err := git.PlainClone(dir, false, &git.CloneOptions{
+		cloneOpts := &git.CloneOptions{
 			URL:      url,
 			Progress: nil,
-			Auth:     &http.BasicAuth{},
-		})
-		if err != nil {
+		}
+
+		// Only add HTTP auth if it's an HTTP/S URL.
+		if strings.HasPrefix(url, "http://") || strings.HasPrefix(url, "https://") {
+			cloneOpts.Auth = &http.BasicAuth{}
+		}
+
+		if _, err := git.PlainClone(dir, false, cloneOpts); err != nil {
 			return fmt.Errorf("failed to clone with go-git: %w", err)
 		}
 	} else {
 		// Local git binary found, use it to clone
-		cmd := exec.Command(gitPath, "clone", url, dir)
-		if err := cmd.Run(); err != nil {
+		if err := exec.Command(gitPath, "clone", url, dir).Run(); err != nil {
 			return fmt.Errorf("failed to clone with local git: %w", err)
 		}
 	}
+
 	return nil
 }
