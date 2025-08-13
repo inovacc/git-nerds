@@ -27,7 +27,6 @@ func Grep(lines []string, pattern string, useRegex bool, ignoreCase bool) []stri
 		if err != nil {
 			return result // return empty if invalid regex
 		}
-
 		for _, l := range lines {
 			if re.MatchString(l) {
 				result = append(result, l)
