@@ -88,7 +88,7 @@ func main() {
 	}
 
 	// 2. Archivos más modificados
-	fmt.Println("\nArchivos más modificados (Top 5):")
+	fmt.Println("\nArchivos más modificados (Top 10):")
 
 	// Convertimos el mapa a un slice para poder ordenarlo.
 	type fileStat struct {
@@ -107,7 +107,7 @@ func main() {
 	})
 
 	// Imprimimos el top 5 o todos si hay menos de 5.
-	limit := 5
+	limit := 10
 	if len(fileStats) < limit {
 		limit = len(fileStats)
 	}

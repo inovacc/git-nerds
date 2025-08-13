@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/inovacc/git-nerds/pkg/unixcompat"
+	"github.com/inovacc/git-nerds/unixcompat"
 )
 
 // CommitsPerAuthor reproduce `git log --pretty=format:%an | sort | uniq -c | sort -nr`
