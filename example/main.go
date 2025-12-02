@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/inovacc/git-nerds/pkg/nerds"
+	gitnerds "github.com/inovacc/git-nerds"
 )
 
 func main() {
@@ -25,7 +25,7 @@ func main() {
 
 func basicExample() {
 	// Open repository at current directory
-	repo, err := git_nerds.Open(".")
+	repo, err := gitnerds.Open(".")
 	if err != nil {
 		log.Printf("Failed to open repository: %v", err)
 		return
@@ -58,7 +58,7 @@ func basicExample() {
 }
 
 func authorExample() {
-	repo, err := git_nerds.Open(".")
+	repo, err := gitnerds.Open(".")
 	if err != nil {
 		log.Printf("Failed to open repository: %v", err)
 		return
@@ -107,7 +107,7 @@ func authorExample() {
 }
 
 func temporalExample() {
-	repo, err := git_nerds.Open(".")
+	repo, err := gitnerds.Open(".")
 	if err != nil {
 		log.Printf("Failed to open repository: %v", err)
 		return
@@ -164,7 +164,7 @@ func temporalExample() {
 }
 
 func exportExample() {
-	repo, err := git_nerds.Open(".")
+	repo, err := gitnerds.Open(".")
 	if err != nil {
 		log.Printf("Failed to open repository: %v", err)
 		return

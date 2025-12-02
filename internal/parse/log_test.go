@@ -237,21 +237,19 @@ func TestParseNumstat(t *testing.T) {
 		},
 		{
 			name:    "single file",
-			input:   "10\t5\tmain.go",
+			input:   "10	5	main.go",
 			want:    1,
 			wantErr: false,
 		},
 		{
-			name: "multiple files",
-			input: `10\t5\tmain.go
-20\t8\tutils.go
-5\t2\tREADME.md`,
+			name:    "multiple files",
+			input:   "10	5	main.go\n20	8	utils.go\n5	2	README.md",
 			want:    3,
 			wantErr: false,
 		},
 		{
 			name:    "binary file",
-			input:   "-\t-\timage.png",
+			input:   "-	-	image.png",
 			want:    1,
 			wantErr: false,
 		},

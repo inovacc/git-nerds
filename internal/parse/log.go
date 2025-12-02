@@ -29,41 +29,90 @@ type AuthorInfo struct {
 
 // ParseCommitLog parses git log output with custom format
 // Expected format: hash|author|email|date|subject
+// When --numstat is used, subsequent lines contain: additions\tdeletions\tfilename
 func ParseCommitLog(output string) ([]CommitInfo, error) {
 	if output == "" {
 		return []CommitInfo{}, nil
 	}
 
-	lines := strings.Split(strings.TrimSpace(output), "\n")
-	commits := make([]CommitInfo, 0, len(lines))
+	lines := strings.Split(output, "\n")
+	commits := make([]CommitInfo, 0)
+	var currentCommit *CommitInfo
 
-	for _, line := range lines {
-		if line == "" {
+	for i := 0; i < len(lines); i++ {
+		line := lines[i]
+
+		// Empty line - finalize current commit if exists
+		if strings.TrimSpace(line) == "" {
+			if currentCommit != nil {
+				commits = append(commits, *currentCommit)
+				currentCommit = nil
+			}
 			continue
 		}
 
-		parts := strings.Split(line, "|")
-		if len(parts) < 5 {
-			continue // Skip malformed lines
+		// Check if this is a commit header line (contains |)
+		if strings.Contains(line, "|") {
+			parts := strings.Split(line, "|")
+			if len(parts) >= 5 {
+				// Finalize previous commit if exists
+				if currentCommit != nil {
+					commits = append(commits, *currentCommit)
+				}
+
+				// Parse date
+				date, err := time.Parse("2006-01-02 15:04:05 -0700", parts[3])
+				if err != nil {
+					// Try alternative formats
+					date, err = time.Parse(time.RFC3339, parts[3])
+					if err != nil {
+						// Try ISO format
+						date, _ = time.Parse("2006-01-02T15:04:05-07:00", parts[3])
+					}
+				}
+
+				// Create new commit
+				currentCommit = &CommitInfo{
+					Hash:      parts[0],
+					Author:    parts[1],
+					Email:     parts[2],
+					Date:      date,
+					Subject:   parts[4],
+					Additions: 0,
+					Deletions: 0,
+					Files:     make([]string, 0),
+				}
+			}
+			continue
 		}
 
-		// Parse date
-		date, err := time.Parse("2006-01-02 15:04:05 -0700", parts[3])
-		if err != nil {
-			// Try alternative formats
-			date, err = time.Parse(time.RFC3339, parts[3])
-			if err != nil {
-				continue // Skip if date parsing fails
+		// Check if this is a numstat line (contains tabs)
+		if currentCommit != nil && strings.Contains(line, "\t") {
+			parts := strings.Split(line, "\t")
+			if len(parts) >= 3 {
+				// Parse additions and deletions
+				additions, err1 := strconv.Atoi(parts[0])
+				deletions, err2 := strconv.Atoi(parts[1])
+
+				// Handle binary files (marked as "-")
+				if err1 != nil {
+					additions = 0
+				}
+				if err2 != nil {
+					deletions = 0
+				}
+
+				// Accumulate stats
+				currentCommit.Additions += additions
+				currentCommit.Deletions += deletions
+				currentCommit.Files = append(currentCommit.Files, parts[2])
 			}
 		}
+	}
 
-		commits = append(commits, CommitInfo{
-			Hash:    parts[0],
-			Author:  parts[1],
-			Email:   parts[2],
-			Date:    date,
-			Subject: parts[4],
-		})
+	// Don't forget the last commit
+	if currentCommit != nil {
+		commits = append(commits, *currentCommit)
 	}
 
 	return commits, nil
