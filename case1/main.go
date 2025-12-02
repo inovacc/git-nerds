@@ -40,7 +40,7 @@ func main() {
 	commitsByWeekday := make(map[time.Weekday]int)
 
 	// Itera sobre cada commit.
-	commitIterator.ForEach(func(commit *object.Commit) error {
+	if err := commitIterator.ForEach(func(commit *object.Commit) error {
 		// 1. Commits por usuario
 		author := commit.Author.Email
 		commitsByUser[author]++
@@ -75,7 +75,9 @@ func main() {
 		}
 
 		return nil
-	})
+	}); err != nil {
+		log.Fatalf("Error al iterar sobre los commits: %s", err)
+	}
 
 	// --- Muestra los resultados ---
 	fmt.Println("--- Estadísticas del Repositorio ---")

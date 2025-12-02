@@ -1,105 +1,208 @@
-# git-quick-stats (Go Port)
+# Git Nerds
 
-Simple and efficient way to access various statistics in a git repository.
+A Go module that provides comprehensive intelligence about Git repositories.
 
 ---
 
 ## Overview
-This project is a Go port of the original [`git-quick-stats`](https://github.com/git-quick-stats/git-quick-stats) Bash script. It provides a fast, scriptable, and interactive way to extract nerdy statistics from any local git repository.
+**Git Nerds** is a reusable Go library that extracts detailed statistics and insights from any local Git repository. Designed to be consumed by other applications, it provides a clean API for repository analysis, contribution metrics, and historical insights.
+
+This project was inspired by the original [`git-quick-stats`](https://github.com/git-quick-stats/git-quick-stats) Bash script, reimagined as a modern Go module for easy integration into any application.
 
 ## Features
-- Contribution stats per author (commits, insertions, deletions, lines changed, files)
-- Changelogs (overall and by author)
-- Daily, monthly, yearly, weekday, and hourly commit stats
-- Calendar and heatmap visualizations
-- Branch tree and branch-by-date
-- Contributors and new contributors
-- Reviewer suggestions
-- Export to CSV and JSON
-- Interactive and non-interactive CLI
+- **Author Analytics**: Commits, insertions, deletions, lines changed, files modified per contributor
+- **Changelogs**: Generate overall and per-author changelogs
+- **Temporal Analysis**: Daily, monthly, yearly, weekday, and hourly commit patterns
+- **Visualizations**: Calendar heatmaps and activity visualizations
+- **Branch Intelligence**: Branch trees, branch age, and timeline analysis
+- **Contributor Insights**: Identify contributors, new contributors, and suggest reviewers
+- **Multiple Backends**: Native Git command execution with optional go-git support
+- **Export Options**: JSON, CSV, and structured data formats
+- **Flexible API**: Easy-to-use Go interfaces for custom integrations
 
-## Usage
+## Installation
 
-### Non-interactive mode
 ```sh
-git-quick-stats [OPTIONS]
+go get github.com/inovacc/git-nerds
 ```
 
-### Interactive mode
-```sh
-git-quick-stats
+## Quick Start
+
+```go
+package main
+
+import (
+    "fmt"
+    "github.com/inovacc/git-nerds/pkg/nerds"
+)
+
+func main() {
+    // Initialize repository analyzer
+    repo, err := nerds.Open("/path/to/repository")
+    if err != nil {
+        panic(err)
+    }
+
+    // Get author statistics
+    authors, err := repo.AuthorStats()
+    if err != nil {
+        panic(err)
+    }
+
+    for _, author := range authors {
+        fmt.Printf("%s: %d commits\n", author.Name, author.Commits)
+    }
+
+    // Get commit activity by day
+    activity, err := repo.CommitsByDay()
+    if err != nil {
+        panic(err)
+    }
+
+    // Export to JSON
+    json, err := repo.ExportJSON()
+    if err != nil {
+        panic(err)
+    }
+    fmt.Println(json)
+}
 ```
 
-## Options (from original Bash/man)
+## API Reference
 
-### Generate
-- `-T`, `--detailed-git-stats` — detailed list of git stats
-- `-R`, `--git-stats-by-branch` — stats by branch
-- `-c`, `--changelogs` — changelogs
-- `-L`, `--changelogs-by-author` — changelogs by author
-- `-S`, `--my-daily-stats` — your current daily stats
-- `-V`, `--csv-output-by-branch` — daily stats by branch in CSV
-- `-j`, `--json-output` — save git log as JSON
+### Core Methods
 
-### List
-- `-b`, `--branch-tree` — ASCII graph of branch history
-- `-D`, `--branches-by-date` — branches by date
-- `-C`, `--contributors` — list contributors
-- `-n`, `--new-contributors` — new contributors since date
-- `-a`, `--commits-per-author` — commits per author
-- `-d`, `--commits-per-day` — commits per day
-- `-m`, `--commits-by-month` — commits per month
-- `-Y`, `--commits-by-year` — commits per year
-- `-w`, `--commits-by-weekday` — commits per weekday
-- `-W`, `--commits-by-author-by-weekday` — commits per weekday by author
-- `-o`, `--commits-by-hour` — commits per hour
-- `-A`, `--commits-by-author-by-hour` — commits per hour by author
-- `-z`, `--commits-by-timezone` — commits per timezone
-- `-Z`, `--commits-by-author-by-timezone` — commits per timezone by author
+#### Repository Analysis
+```go
+repo.DetailedStats() (*Stats, error)          // Comprehensive repository statistics
+repo.StatsByBranch(branch string) (*Stats, error) // Stats for a specific branch
+repo.Changelogs() ([]Changelog, error)        // Generate changelogs
+repo.ChangelogsByAuthor(author string) ([]Changelog, error) // Author-specific changelogs
+```
 
-### Calendar
-- `-k`, `--commits-calendar-by-author` — calendar heatmap by author
-- `-H`, `--commits-heatmap` — heatmap of commits per day/hour (last 30 days)
+#### Author Analytics
+```go
+repo.Contributors() ([]Contributor, error)     // List all contributors
+repo.NewContributors(since time.Time) ([]Contributor, error) // New contributors since date
+repo.CommitsPerAuthor() (map[string]int, error) // Commit count by author
+repo.SuggestReviewers(file string) ([]string, error) // Suggest reviewers for a file
+```
 
-### Suggest
-- `-r`, `--suggest-reviewers` — suggest code reviewers
-- `-h`, `-?`, `--help` — show help
+#### Temporal Analysis
+```go
+repo.CommitsByDay() (map[string]int, error)   // Commits per day
+repo.CommitsByMonth() (map[string]int, error) // Commits per month
+repo.CommitsByYear() (map[string]int, error)  // Commits per year
+repo.CommitsByWeekday() (map[string]int, error) // Commits per weekday
+repo.CommitsByHour() (map[int]int, error)     // Commits per hour
+repo.CommitsByTimezone() (map[string]int, error) // Commits per timezone
+```
 
-## Environment Variables
-- `_GIT_SINCE`, `_GIT_UNTIL` — limit git time log (e.g. `export _GIT_SINCE="2017-01-20"`)
-- `_GIT_LIMIT` — limit output log (e.g. `export _GIT_LIMIT=20`)
-- `_GIT_LOG_OPTIONS` — extra git log options
-- `_GIT_PATHSPEC` — exclude files/dirs (e.g. `export _GIT_PATHSPEC=':!pattern'`)
-- `_GIT_MERGE_VIEW` — show/hide merge commits (`enable`, `exclusive`)
-- `_GIT_SORT_BY` — sort stats by field/order (e.g. `export _GIT_SORT_BY="commits-desc"`)
-- `_MENU_THEME` — color theme (`default`, `legacy`, `none`)
-- `_GIT_BRANCH` — branch to analyze
-- `_GIT_IGNORE_AUTHORS` — regex to filter authors
-- `_GIT_DAYS` — number of days for heatmap
+#### Branch Analysis
+```go
+repo.BranchTree() (*Tree, error)              // ASCII graph of branch history
+repo.BranchesByDate() ([]Branch, error)       // Branches sorted by date
+```
 
-## Example
-```sh
-export _GIT_SINCE="2023-01-01"
-export _GIT_LIMIT=50
-git-quick-stats --detailed-git-stats
+#### Visualization
+```go
+repo.CommitsCalendar(author string) (*Calendar, error) // Calendar heatmap
+repo.CommitsHeatmap(days int) (*Heatmap, error) // Activity heatmap
+```
+
+#### Export
+```go
+repo.ExportJSON() (string, error)             // Export to JSON
+repo.ExportCSV() (string, error)              // Export to CSV
+repo.ExportMarkdown() (string, error)         // Export as Markdown report
+```
+
+## Configuration
+
+Configure repository analysis with flexible options:
+
+```go
+package main
+
+import (
+    "time"
+    "github.com/inovacc/git-nerds/pkg/nerds"
+)
+
+func main() {
+    // Open repository with options
+    repo, err := nerds.Open("/path/to/repo", &nerds.Options{
+        Since:         time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC),
+        Until:         time.Now(),
+        Branch:        "main",
+        Limit:         50,
+        PathSpec:      []string{":!vendor", ":!node_modules"}, // Exclude paths
+        IgnoreAuthors: []string{"bot@.*"},                      // Regex patterns
+        IncludeMerges: true,
+        SortBy:        "commits-desc",
+    })
+    if err != nil {
+        panic(err)
+    }
+
+    // Use the configured repository
+    stats, err := repo.DetailedStats()
+    // ...
+}
 ```
 
 ## Project Structure
-- `cmd/` — CLI entrypoint (planned)
-- `pkg/` — Go logic (stats, backend, unixcompat, etc.)
-- `testdata/` — test repositories and fixtures
-- `git-quick-stats` — original Bash script (reference)
-- `git-quick-stats.1` — original man page (reference)
 
-## Migration Notes
-- This Go module aims to replicate all features of the Bash version.
-- The Bash script and man page are kept for reference and as documentation.
+```
+git-nerds/
+├── pkg/
+│   └── nerds/           # Public API - main module interface
+│       ├── repository.go    # Repository type and core methods
+│       ├── options.go       # Configuration options
+│       ├── types.go         # Public types (Stats, Author, etc.)
+│       └── export.go        # Export functionality
+├── internal/
+│   ├── git/             # Git backend implementations
+│   │   ├── backend.go       # Backend interface
+│   │   ├── exec.go          # Git CLI execution (default)
+│   │   └── gogit.go         # go-git implementation (optional)
+│   ├── analysis/        # Analysis engines
+│   │   ├── authors.go       # Author analytics
+│   │   ├── temporal.go      # Time-based analysis
+│   │   ├── branches.go      # Branch analysis
+│   │   └── files.go         # File change analysis
+│   ├── parse/           # Git output parsers
+│   └── unixcompat/      # Unix tool replacements (sort, grep)
+├── cmd/
+│   └── git-nerds/       # Optional CLI wrapper (for testing)
+└── testdata/            # Test repositories and fixtures
+
+```
+
+## Design Principles
+- **Module-First**: Designed as a library, not a standalone application
+- **Clean API**: Simple, intuitive Go interfaces
+- **Backend Agnostic**: Support multiple Git backends (exec, go-git)
+- **Zero Dependencies**: Core functionality with minimal external deps
+- **Testable**: Comprehensive test coverage with fixtures
+
+## Use Cases
+
+- **Code Review Tools**: Suggest reviewers based on file history
+- **Analytics Dashboards**: Build custom Git analytics UIs
+- **CI/CD Pipelines**: Generate automated reports and insights
+- **Developer Tools**: Integrate repository intelligence into IDEs
+- **Team Metrics**: Track team contributions and patterns
+- **Documentation**: Auto-generate contributor lists and changelogs
 
 ## See Also
-- [git-quick-stats (original Bash)](https://github.com/git-quick-stats/git-quick-stats)
-- `man ./git-quick-stats.1`
+- [git-quick-stats (original Bash)](https://github.com/git-quick-stats/git-quick-stats) - Original inspiration
 
----
+## License
 
-*This README is generated from the original Bash script and man page for clarity and completeness.*
+[Add your license here]
+
+## Contributing
+
+Contributions are welcome! This is a module-first library designed for easy integration into any Go application.
 

@@ -1,4 +1,4 @@
-package unixcompat
+package unix
 
 import (
 	"bufio"
