@@ -37,7 +37,7 @@ package main
 
 import (
   "fmt"
-  "github.com/inovacc/git-nerds/pkg/nerds"
+  nerds "github.com/inovacc/git-nerds"
 )
 
 func main() {
@@ -47,18 +47,18 @@ func main() {
     panic(err)
   }
 
-  // Get author statistics
-  authors, err := repo.AuthorStats()
+  // Get contributor statistics
+  contributors, err := repo.Contributors()
   if err != nil {
     panic(err)
   }
 
-  for _, author := range authors {
-    fmt.Printf("%s: %d commits\n", author.Name, author.Commits)
+  for _, c := range contributors {
+    fmt.Printf("%s: %d commits\n", c.Name, c.Commits)
   }
 
   // Get commit activity by day
-  activity, err := repo.CommitsByDay()
+  _, err = repo.CommitsByDay()
   if err != nil {
     panic(err)
   }
@@ -79,51 +79,51 @@ func main() {
 #### Repository Analysis
 
 ```go
-repo.DetailedStats() (*Stats, error)          // Comprehensive repository statistics
-repo.StatsByBranch(branch string) (*Stats, error) // Stats for a specific branch
-repo.Changelogs() ([]Changelog, error) // Generate changelogs
+repo.DetailedStats() (*Stats, error)                 // Comprehensive repository statistics
+repo.StatsByBranch(branch string) (*Stats, error)    // Stats for a specific branch
+repo.Changelogs() ([]Changelog, error)               // Generate changelogs
 repo.ChangelogsByAuthor(author string) ([]Changelog, error) // Author-specific changelogs
 ```
 
 #### Author Analytics
 
 ```go
-repo.Contributors() ([]Contributor, error) // List all contributors
-repo.NewContributors(since time.Time) ([]Contributor, error) // New contributors since date
-repo.CommitsPerAuthor() (map[string]int, error) // Commit count by author
-repo.SuggestReviewers(file string) ([]string, error) // Suggest reviewers for a file
+repo.Contributors() ([]Contributor, error)                      // List all contributors
+repo.NewContributors(since time.Time) ([]Contributor, error)    // New contributors since date
+repo.CommitsPerAuthor() (map[string]int, error)                 // Commit count by author
+repo.SuggestReviewers(file string) ([]string, error)            // Suggest reviewers for a file
 ```
 
 #### Temporal Analysis
 
 ```go
-repo.CommitsByDay() (map[string]int, error) // Commits per day
-repo.CommitsByMonth() (map[string]int, error) // Commits per month
-repo.CommitsByYear() (map[string]int, error) // Commits per year
-repo.CommitsByWeekday() (map[string]int, error) // Commits per weekday
-repo.CommitsByHour() (map[int]int, error) // Commits per hour
-repo.CommitsByTimezone() (map[string]int, error) // Commits per timezone
+repo.CommitsByDay() (map[string]int, error)        // Commits per day
+repo.CommitsByMonth() (map[string]int, error)      // Commits per month
+repo.CommitsByYear() (map[string]int, error)       // Commits per year
+repo.CommitsByWeekday() (map[string]int, error)    // Commits per weekday
+repo.CommitsByHour() (map[int]int, error)          // Commits per hour
+repo.CommitsByTimezone() (map[string]int, error)   // Commits per timezone
 ```
 
 #### Branch Analysis
 
 ```go
-repo.BranchTree() (*Tree, error)              // ASCII graph of branch history
-repo.BranchesByDate() ([]Branch, error) // Branches sorted by date
+repo.BranchTree() (*Tree, error)           // ASCII graph of branch history
+repo.BranchesByDate() ([]Branch, error)    // Branches sorted by date
 ```
 
 #### Visualization
 
 ```go
 repo.CommitsCalendar(author string) (*Calendar, error) // Calendar heatmap
-repo.CommitsHeatmap(days int) (*Heatmap, error) // Activity heatmap
+repo.CommitsHeatmap(days int) (*Heatmap, error)        // Activity heatmap
 ```
 
 #### Export
 
 ```go
-repo.ExportJSON() (string, error) // Export to JSON
-repo.ExportCSV() (string, error)              // Export to CSV
+repo.ExportJSON() (string, error)     // Export to JSON
+repo.ExportCSV() (string, error)      // Export to CSV
 repo.ExportMarkdown() (string, error) // Export as Markdown report
 ```
 
@@ -136,7 +136,7 @@ package main
 
 import (
   "time"
-  "github.com/inovacc/git-nerds/pkg/nerds"
+  nerds "github.com/inovacc/git-nerds"
 )
 
 func main() {
@@ -147,17 +147,18 @@ func main() {
     Branch:        "main",
     Limit:         50,
     PathSpec:      []string{":!vendor", ":!node_modules"}, // Exclude paths
-    IgnoreAuthors: []string{"bot@.*"},                     // Regex patterns
+    IgnoreAuthors: []string{"bot@.*"},                      // Regex patterns
     IncludeMerges: true,
-    SortBy:        "commits-desc",
   })
   if err != nil {
     panic(err)
   }
 
   // Use the configured repository
-  stats, err := repo.DetailedStats()
-  // ...
+  _, err = repo.DetailedStats()
+  if err != nil {
+    panic(err)
+  }
 }
 ```
 
@@ -165,35 +166,31 @@ func main() {
 
 ```
 git-nerds/
-├── pkg/
-│   └── nerds/           # Public API - main module interface
-│       ├── repository.go    # Repository type and core methods
-│       ├── options.go       # Configuration options
-│       ├── types.go         # Public types (Stats, Author, etc.)
-│       └── export.go        # Export functionality
+├── README.md
+├── go.mod
+├── doc.go                 # Package documentation and examples
+├── repository.go          # Public API: Repository type and core methods
+├── options.go             # Configuration options
+├── types.go               # Public types (Stats, Author, etc.)
+├── export.go              # Export functionality
+├── example/
+│   └── main.go            # End-to-end usage examples
 ├── internal/
-│   ├── git/             # Git backend implementations
-│   │   ├── backend.go       # Backend interface
-│   │   ├── exec.go          # Git CLI execution (default)
-│   │   └── gogit.go         # go-git implementation (optional)
-│   ├── analysis/        # Analysis engines
-│   │   ├── authors.go       # Author analytics
-│   │   ├── temporal.go      # Time-based analysis
-│   │   ├── branches.go      # Branch analysis
-│   │   └── files.go         # File change analysis
-│   ├── parse/           # Git output parsers
-│   └── unixcompat/      # Unix tool replacements (sort, grep)
-├── cmd/
-│   └── git-nerds/       # Optional CLI wrapper (for testing)
-└── testdata/            # Test repositories and fixtures
+│   ├── git/               # Git backend implementations
+│   │   ├── backend.go     # Backend interface
+│   │   └── exec.go        # Git CLI execution (default)
+│   ├── analysis/          # Analysis engines
+│   ├── parse/             # Git output parsers
+│   └── stats/             # Stats helpers and aggregations
+└── ...
 
 ```
 
-## Design Principles
+## Notes & Design Principles
 
 - **Module-First**: Designed as a library, not a standalone application
 - **Clean API**: Simple, intuitive Go interfaces
-- **Backend Agnostic**: Support multiple Git backends (exec, go-git)
+- **Backend**: Uses native Git CLI execution backend by default (internal/git/exec). A go-git backend may be added later.
 - **Zero Dependencies**: Core functionality with minimal external deps
 - **Testable**: Comprehensive test coverage with fixtures
 
