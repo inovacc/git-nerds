@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/inovacc/git-nerds/unixcompat"
+	"github.com/inovacc/git-nerds/pkg/unix"
 )
 
 // CommitsPerAuthor reproduce `git log --pretty=format:%an | sort | uniq -c | sort -nr`
@@ -29,7 +29,7 @@ func CommitsPerAuthor(b Backend) error {
 	}
 
 	// Ordenar por valor descendente
-	sorted := unixcompat.SortByValue(counts)
+	sorted := unix.SortByValue(counts)
 
 	// Imprimir alineado
 	for _, kv := range sorted {

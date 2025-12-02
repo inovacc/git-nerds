@@ -5,11 +5,15 @@ A Go module that provides comprehensive intelligence about Git repositories.
 ---
 
 ## Overview
-**Git Nerds** is a reusable Go library that extracts detailed statistics and insights from any local Git repository. Designed to be consumed by other applications, it provides a clean API for repository analysis, contribution metrics, and historical insights.
 
-This project was inspired by the original [`git-quick-stats`](https://github.com/git-quick-stats/git-quick-stats) Bash script, reimagined as a modern Go module for easy integration into any application.
+**Git Nerds** is a reusable Go library that extracts detailed statistics and insights from any local Git repository. Designed to be consumed by other applications, it provides a clean API for
+repository analysis, contribution metrics, and historical insights.
+
+This project was inspired by the original [`git-quick-stats`](https://github.com/git-quick-stats/git-quick-stats) Bash script, reimagined as a modern Go module for easy integration into any
+application.
 
 ## Features
+
 - **Author Analytics**: Commits, insertions, deletions, lines changed, files modified per contributor
 - **Changelogs**: Generate overall and per-author changelogs
 - **Temporal Analysis**: Daily, monthly, yearly, weekday, and hourly commit patterns
@@ -32,39 +36,39 @@ go get github.com/inovacc/git-nerds
 package main
 
 import (
-    "fmt"
-    "github.com/inovacc/git-nerds/pkg/nerds"
+  "fmt"
+  "github.com/inovacc/git-nerds/pkg/nerds"
 )
 
 func main() {
-    // Initialize repository analyzer
-    repo, err := nerds.Open("/path/to/repository")
-    if err != nil {
-        panic(err)
-    }
+  // Initialize repository analyzer
+  repo, err := nerds.Open("/path/to/repository")
+  if err != nil {
+    panic(err)
+  }
 
-    // Get author statistics
-    authors, err := repo.AuthorStats()
-    if err != nil {
-        panic(err)
-    }
+  // Get author statistics
+  authors, err := repo.AuthorStats()
+  if err != nil {
+    panic(err)
+  }
 
-    for _, author := range authors {
-        fmt.Printf("%s: %d commits\n", author.Name, author.Commits)
-    }
+  for _, author := range authors {
+    fmt.Printf("%s: %d commits\n", author.Name, author.Commits)
+  }
 
-    // Get commit activity by day
-    activity, err := repo.CommitsByDay()
-    if err != nil {
-        panic(err)
-    }
+  // Get commit activity by day
+  activity, err := repo.CommitsByDay()
+  if err != nil {
+    panic(err)
+  }
 
-    // Export to JSON
-    json, err := repo.ExportJSON()
-    if err != nil {
-        panic(err)
-    }
-    fmt.Println(json)
+  // Export to JSON
+  json, err := repo.ExportJSON()
+  if err != nil {
+    panic(err)
+  }
+  fmt.Println(json)
 }
 ```
 
@@ -73,48 +77,54 @@ func main() {
 ### Core Methods
 
 #### Repository Analysis
+
 ```go
 repo.DetailedStats() (*Stats, error)          // Comprehensive repository statistics
 repo.StatsByBranch(branch string) (*Stats, error) // Stats for a specific branch
-repo.Changelogs() ([]Changelog, error)        // Generate changelogs
+repo.Changelogs() ([]Changelog, error) // Generate changelogs
 repo.ChangelogsByAuthor(author string) ([]Changelog, error) // Author-specific changelogs
 ```
 
 #### Author Analytics
+
 ```go
-repo.Contributors() ([]Contributor, error)     // List all contributors
+repo.Contributors() ([]Contributor, error) // List all contributors
 repo.NewContributors(since time.Time) ([]Contributor, error) // New contributors since date
 repo.CommitsPerAuthor() (map[string]int, error) // Commit count by author
 repo.SuggestReviewers(file string) ([]string, error) // Suggest reviewers for a file
 ```
 
 #### Temporal Analysis
+
 ```go
-repo.CommitsByDay() (map[string]int, error)   // Commits per day
+repo.CommitsByDay() (map[string]int, error) // Commits per day
 repo.CommitsByMonth() (map[string]int, error) // Commits per month
-repo.CommitsByYear() (map[string]int, error)  // Commits per year
+repo.CommitsByYear() (map[string]int, error) // Commits per year
 repo.CommitsByWeekday() (map[string]int, error) // Commits per weekday
-repo.CommitsByHour() (map[int]int, error)     // Commits per hour
+repo.CommitsByHour() (map[int]int, error) // Commits per hour
 repo.CommitsByTimezone() (map[string]int, error) // Commits per timezone
 ```
 
 #### Branch Analysis
+
 ```go
 repo.BranchTree() (*Tree, error)              // ASCII graph of branch history
-repo.BranchesByDate() ([]Branch, error)       // Branches sorted by date
+repo.BranchesByDate() ([]Branch, error) // Branches sorted by date
 ```
 
 #### Visualization
+
 ```go
 repo.CommitsCalendar(author string) (*Calendar, error) // Calendar heatmap
 repo.CommitsHeatmap(days int) (*Heatmap, error) // Activity heatmap
 ```
 
 #### Export
+
 ```go
-repo.ExportJSON() (string, error)             // Export to JSON
+repo.ExportJSON() (string, error) // Export to JSON
 repo.ExportCSV() (string, error)              // Export to CSV
-repo.ExportMarkdown() (string, error)         // Export as Markdown report
+repo.ExportMarkdown() (string, error) // Export as Markdown report
 ```
 
 ## Configuration
@@ -125,29 +135,29 @@ Configure repository analysis with flexible options:
 package main
 
 import (
-    "time"
-    "github.com/inovacc/git-nerds/pkg/nerds"
+  "time"
+  "github.com/inovacc/git-nerds/pkg/nerds"
 )
 
 func main() {
-    // Open repository with options
-    repo, err := nerds.Open("/path/to/repo", &nerds.Options{
-        Since:         time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC),
-        Until:         time.Now(),
-        Branch:        "main",
-        Limit:         50,
-        PathSpec:      []string{":!vendor", ":!node_modules"}, // Exclude paths
-        IgnoreAuthors: []string{"bot@.*"},                      // Regex patterns
-        IncludeMerges: true,
-        SortBy:        "commits-desc",
-    })
-    if err != nil {
-        panic(err)
-    }
+  // Open repository with options
+  repo, err := nerds.Open("/path/to/repo", &nerds.Options{
+    Since:         time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC),
+    Until:         time.Now(),
+    Branch:        "main",
+    Limit:         50,
+    PathSpec:      []string{":!vendor", ":!node_modules"}, // Exclude paths
+    IgnoreAuthors: []string{"bot@.*"},                     // Regex patterns
+    IncludeMerges: true,
+    SortBy:        "commits-desc",
+  })
+  if err != nil {
+    panic(err)
+  }
 
-    // Use the configured repository
-    stats, err := repo.DetailedStats()
-    // ...
+  // Use the configured repository
+  stats, err := repo.DetailedStats()
+  // ...
 }
 ```
 
@@ -180,6 +190,7 @@ git-nerds/
 ```
 
 ## Design Principles
+
 - **Module-First**: Designed as a library, not a standalone application
 - **Clean API**: Simple, intuitive Go interfaces
 - **Backend Agnostic**: Support multiple Git backends (exec, go-git)
@@ -196,6 +207,7 @@ git-nerds/
 - **Documentation**: Auto-generate contributor lists and changelogs
 
 ## See Also
+
 - [git-quick-stats (original Bash)](https://github.com/git-quick-stats/git-quick-stats) - Original inspiration
 
 ## License

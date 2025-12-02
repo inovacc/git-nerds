@@ -1,4 +1,4 @@
-package nerds
+package git_nerds
 
 import "time"
 

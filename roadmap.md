@@ -25,6 +25,7 @@
 ## 2) Roadmap by Phase
 
 ### Phase 0 — Project Foundation
+
 - [x] Repository setup with Go modules
 - [ ] Conventional commits and commitlint configuration
 - [ ] Git hooks (pre-commit: fmt/vet/test, pre-push: race tests)
@@ -34,6 +35,7 @@
 - [ ] Code of conduct and contributing guide
 
 ### Phase 1 — Core Git Backend
+
 - [ ] **Backend Interface**: Define clean abstraction for Git operations
   - `internal/git/backend.go` - Backend interface
   - `internal/git/exec.go` - Git CLI implementation (default)
@@ -46,6 +48,7 @@
   - Handle edge cases (merge commits, empty commits, etc.)
 
 ### Phase 2 — Domain Model
+
 - [ ] **Core Types** (`pkg/nerds/types.go`):
   - `Repository` - Main entry point
   - `Commit` - Commit data
@@ -61,6 +64,7 @@
   - Merge commit handling
 
 ### Phase 3 — Analysis Engines
+
 - [ ] **Author Analytics** (`internal/analysis/authors.go`):
   - Commits per author
   - Lines added/deleted per author
@@ -87,6 +91,7 @@
   - Ownership by file
 
 ### Phase 4 — Public API
+
 - [ ] **Repository** (`pkg/nerds/repository.go`):
   ```go
   type Repository interface {
@@ -123,6 +128,7 @@
   ```
 
 ### Phase 5 — Export Formats
+
 - [ ] **JSON Export** (`pkg/nerds/export.go`):
   - Structured JSON with all statistics
   - Machine-readable format for downstream tools
@@ -136,6 +142,7 @@
   - Generated changelogs
 
 ### Phase 6 — Changelog Generation
+
 - [ ] **Changelog Builder** (`internal/analysis/changelog.go`):
   - Overall repository changelog
   - Per-author changelogs
@@ -144,6 +151,7 @@
   - Grouping by type (feat, fix, docs, etc.)
 
 ### Phase 7 — Performance & Optimization
+
 - [ ] **Caching Strategy**:
   - Optional in-memory caching
   - Incremental analysis (avoid re-parsing)
@@ -156,6 +164,7 @@
   - Optimization based on real-world repos
 
 ### Phase 8 — Testing & Quality
+
 - [ ] **Unit Tests**:
   - 80%+ code coverage
   - Test all public API methods
@@ -171,6 +180,7 @@
   - Integration guides
 
 ### Phase 9 — Optional CLI
+
 - [ ] **CLI Wrapper** (`cmd/git-nerds/main.go`):
   - Thin wrapper around pkg/nerds
   - Primarily for testing and demonstration
@@ -178,6 +188,7 @@
   - Output to stdout (JSON/CSV/Markdown)
 
 ### Phase 10 — Advanced Features
+
 - [ ] **Submodule Support**:
   - Detect submodules
   - Aggregate submodule statistics
@@ -193,23 +204,23 @@
 
 ## 3) Feature Priority Matrix
 
-| Priority | Feature | Phase | Status |
-|----------|---------|-------|--------|
-| P0 | Git backend (exec) | 1 | In Progress |
-| P0 | Core domain model | 2 | Pending |
-| P0 | Public API design | 4 | Pending |
-| P0 | JSON export | 5 | Pending |
-| P1 | Author analytics | 3 | Pending |
-| P1 | Temporal analysis | 3 | Pending |
-| P1 | Branch analysis | 3 | Pending |
-| P1 | Markdown export | 5 | Pending |
-| P2 | File hotspot detection | 3 | Pending |
-| P2 | Changelog generation | 6 | Pending |
-| P2 | CSV export | 5 | Pending |
-| P2 | Caching & optimization | 7 | Pending |
-| P3 | CLI wrapper | 9 | Pending |
-| P3 | Submodule support | 10 | Pending |
-| P3 | Advanced Git features | 10 | Pending |
+| Priority | Feature                | Phase | Status      |
+|----------|------------------------|-------|-------------|
+| P0       | Git backend (exec)     | 1     | In Progress |
+| P0       | Core domain model      | 2     | Pending     |
+| P0       | Public API design      | 4     | Pending     |
+| P0       | JSON export            | 5     | Pending     |
+| P1       | Author analytics       | 3     | Pending     |
+| P1       | Temporal analysis      | 3     | Pending     |
+| P1       | Branch analysis        | 3     | Pending     |
+| P1       | Markdown export        | 5     | Pending     |
+| P2       | File hotspot detection | 3     | Pending     |
+| P2       | Changelog generation   | 6     | Pending     |
+| P2       | CSV export             | 5     | Pending     |
+| P2       | Caching & optimization | 7     | Pending     |
+| P3       | CLI wrapper            | 9     | Pending     |
+| P3       | Submodule support      | 10    | Pending     |
+| P3       | Advanced Git features  | 10    | Pending     |
 
 ---
 
@@ -265,84 +276,87 @@ git-nerds/
 ## 5) API Design Examples
 
 ### Basic Usage
+
 ```go
 package main
 
 import (
-    "fmt"
-    "github.com/yourusername/git-nerds/pkg/nerds"
+  "fmt"
+  "github.com/yourusername/git-nerds/pkg/nerds"
 )
 
 func main() {
-    repo, err := nerds.Open(".")
-    if err != nil {
-        panic(err)
-    }
+  repo, err := nerds.Open(".")
+  if err != nil {
+    panic(err)
+  }
 
-    authors, err := repo.Contributors()
-    if err != nil {
-        panic(err)
-    }
+  authors, err := repo.Contributors()
+  if err != nil {
+    panic(err)
+  }
 
-    for _, author := range authors {
-        fmt.Printf("%s: %d commits\n", author.Name, author.Commits)
-    }
+  for _, author := range authors {
+    fmt.Printf("%s: %d commits\n", author.Name, author.Commits)
+  }
 }
 ```
 
 ### Advanced Usage with Options
+
 ```go
 package main
 
 import (
-    "time"
-    "github.com/yourusername/git-nerds/pkg/nerds"
+  "time"
+  "github.com/yourusername/git-nerds/pkg/nerds"
 )
 
 func main() {
-    opts := &nerds.Options{
-        Since:         time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC),
-        Until:         time.Now(),
-        Branch:        "main",
-        PathSpec:      []string{":!vendor", ":!*.generated.go"},
-        IgnoreAuthors: []string{"bot@.*", ".*\\[bot\\]"},
-        IncludeMerges: false,
-    }
+  opts := &nerds.Options{
+    Since:         time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC),
+    Until:         time.Now(),
+    Branch:        "main",
+    PathSpec:      []string{":!vendor", ":!*.generated.go"},
+    IgnoreAuthors: []string{"bot@.*", ".*\\[bot\\]"},
+    IncludeMerges: false,
+  }
 
-    repo, err := nerds.Open("/path/to/repo", opts)
-    if err != nil {
-        panic(err)
-    }
+  repo, err := nerds.Open("/path/to/repo", opts)
+  if err != nil {
+    panic(err)
+  }
 
-    // Export to JSON
-    json, err := repo.ExportJSON()
-    // ... use json
+  // Export to JSON
+  json, err := repo.ExportJSON()
+  // ... use json
 }
 ```
 
 ### Integration Example
+
 ```go
 // Code review tool integration
 func suggestReviewersForPR(repoPath string, changedFiles []string) ([]string, error) {
-    repo, err := nerds.Open(repoPath)
-    if err != nil {
-        return nil, err
-    }
+repo, err := nerds.Open(repoPath)
+if err != nil {
+return nil, err
+}
 
-    reviewers := make(map[string]int)
-    for _, file := range changedFiles {
-        suggestions, err := repo.SuggestReviewers(file)
-        if err != nil {
-            continue
-        }
-        for _, reviewer := range suggestions {
-            reviewers[reviewer]++
-        }
-    }
+reviewers := make(map[string]int)
+for _, file := range changedFiles {
+suggestions, err := repo.SuggestReviewers(file)
+if err != nil {
+continue
+}
+for _, reviewer := range suggestions {
+reviewers[reviewer]++
+}
+}
 
-    // Return top 3 reviewers
-    // ... sort and return
-    return topReviewers, nil
+// Return top 3 reviewers
+// ... sort and return
+return topReviewers, nil
 }
 ```
 
@@ -351,6 +365,7 @@ func suggestReviewersForPR(repoPath string, changedFiles []string) ([]string, er
 ## 6) Metrics Definitions
 
 ### Author Metrics
+
 - **Commits**: Total commits by author
 - **Lines Added**: Sum of insertions
 - **Lines Deleted**: Sum of deletions
@@ -361,18 +376,21 @@ func suggestReviewersForPR(repoPath string, changedFiles []string) ([]string, er
 - **Last Seen**: Date of most recent commit
 
 ### Temporal Metrics
+
 - **Commits per Day/Week/Month/Year**: Count by time period
 - **Commits by Hour**: Distribution across 24 hours
 - **Commits by Weekday**: Distribution Mon-Sun
 - **Commits by Timezone**: Based on commit timestamp
 
 ### Branch Metrics
+
 - **Branch Count**: Total branches
 - **Branch Age**: Time since branch creation
 - **Merge Frequency**: Merges per time period
 - **Active Branches**: Branches with recent commits
 
 ### File Metrics
+
 - **Churn**: Frequency of changes
 - **Hotspots**: Files with highest churn
 - **Size**: Current file size
@@ -383,37 +401,41 @@ func suggestReviewersForPR(repoPath string, changedFiles []string) ([]string, er
 ## 7) Testing Strategy
 
 ### Unit Tests
+
 - Test each analysis function independently
 - Mock Git backend for isolated testing
 - Cover edge cases and error conditions
 
 ### Integration Tests
+
 - Use real Git repositories in testdata/
 - Verify end-to-end functionality
 - Compare output with known-good results (golden tests)
 
 ### Performance Tests
+
 - Benchmark critical paths
 - Test with large repositories
 - Memory usage profiling
 
 ### Example Test
+
 ```go
 func TestAuthorStats(t *testing.T) {
-    repo, err := nerds.Open("testdata/repos/simple")
-    if err != nil {
-        t.Fatal(err)
-    }
+repo, err := nerds.Open("testdata/repos/simple")
+if err != nil {
+t.Fatal(err)
+}
 
-    authors, err := repo.Contributors()
-    if err != nil {
-        t.Fatal(err)
-    }
+authors, err := repo.Contributors()
+if err != nil {
+t.Fatal(err)
+}
 
-    // Verify expected authors
-    if len(authors) != 3 {
-        t.Errorf("expected 3 authors, got %d", len(authors))
-    }
+// Verify expected authors
+if len(authors) != 3 {
+t.Errorf("expected 3 authors, got %d", len(authors))
+}
 }
 ```
 
@@ -422,6 +444,7 @@ func TestAuthorStats(t *testing.T) {
 ## 8) Release Plan
 
 ### v0.1.0 - Core Foundation
+
 - Git backend (exec)
 - Basic domain model
 - Author analytics
@@ -429,30 +452,35 @@ func TestAuthorStats(t *testing.T) {
 - Unit tests
 
 ### v0.2.0 - Temporal Analysis
+
 - Commits by day/week/month/year
 - Commits by hour/weekday
 - Activity heatmaps
 - Markdown export
 
 ### v0.3.0 - Branch & File Analysis
+
 - Branch statistics
 - File hotspot detection
 - Reviewer suggestions
 - CSV export
 
 ### v0.4.0 - Changelogs
+
 - Changelog generation
 - Per-author changelogs
 - Release diff
 - Conventional commits support
 
 ### v0.5.0 - Performance & Polish
+
 - Caching implementation
 - Performance optimizations
 - Comprehensive documentation
 - CLI wrapper
 
 ### v1.0.0 - Production Ready
+
 - go-git backend support
 - Extensive test coverage (>80%)
 - Production-hardened
@@ -463,12 +491,14 @@ func TestAuthorStats(t *testing.T) {
 ## 9) Documentation Requirements
 
 ### GoDoc
+
 - [ ] All public types documented
 - [ ] All public functions documented
 - [ ] Package-level documentation
 - [ ] Usage examples in doc comments
 
 ### README
+
 - [x] Overview and features
 - [x] Installation instructions
 - [x] Quick start guide
@@ -477,6 +507,7 @@ func TestAuthorStats(t *testing.T) {
 - [x] Use cases
 
 ### Additional Docs
+
 - [ ] Integration guide
 - [ ] Architecture overview
 - [ ] Performance tuning guide
@@ -487,12 +518,14 @@ func TestAuthorStats(t *testing.T) {
 ## 10) Success Criteria
 
 ### Functional
+
 - ✅ Can analyze any Git repository
 - ✅ Provides accurate statistics
 - ✅ Exports in multiple formats
 - ✅ Easy to integrate
 
 ### Non-Functional
+
 - ✅ Zero dependencies for core features
 - ✅ Fast (< 1s for typical repos)
 - ✅ Memory efficient (< 100MB for typical repos)
@@ -500,6 +533,7 @@ func TestAuthorStats(t *testing.T) {
 - ✅ Well-documented
 
 ### Adoption
+
 - ✅ Used by at least 3 different applications
 - ✅ Positive community feedback
 - ✅ Active maintenance and issue resolution
@@ -508,13 +542,13 @@ func TestAuthorStats(t *testing.T) {
 
 ## 11) Risks & Mitigation
 
-| Risk | Impact | Mitigation |
-|------|--------|------------|
-| Git output format changes | High | Use stable format options, version tests |
-| Large repository performance | Medium | Implement caching, streaming |
-| Complex merge history parsing | Medium | Comprehensive test fixtures |
-| Cross-platform compatibility | Low | Test on Windows, Linux, macOS |
-| Dependency bloat | Low | Minimize external dependencies |
+| Risk                          | Impact | Mitigation                               |
+|-------------------------------|--------|------------------------------------------|
+| Git output format changes     | High   | Use stable format options, version tests |
+| Large repository performance  | Medium | Implement caching, streaming             |
+| Complex merge history parsing | Medium | Comprehensive test fixtures              |
+| Cross-platform compatibility  | Low    | Test on Windows, Linux, macOS            |
+| Dependency bloat              | Low    | Minimize external dependencies           |
 
 ---
 
@@ -532,6 +566,7 @@ func TestAuthorStats(t *testing.T) {
 ## 13) v0.1.0 Launch Checklist
 
 Core Features:
+
 - [ ] Git backend interface implemented
 - [ ] Exec backend working
 - [ ] Repository.Open() function
@@ -540,6 +575,7 @@ Core Features:
 - [ ] Basic configuration options
 
 Quality:
+
 - [ ] Unit tests for all public APIs
 - [ ] Integration test with sample repo
 - [ ] GoDoc documentation
@@ -547,6 +583,7 @@ Quality:
 - [ ] GitHub Actions CI
 
 Release:
+
 - [ ] Semantic versioning (v0.1.0)
 - [ ] Git tag created
 - [ ] CHANGELOG.md

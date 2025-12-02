@@ -118,4 +118,4 @@
 //		// ...
 //		return topReviewers, nil
 //	}
-package nerds
+package git_nerds

@@ -1,4 +1,4 @@
-package nerds
+package git_nerds
 
 import (
 	"fmt"
@@ -6,15 +6,15 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/inovacc/git-nerds/internal/analysis"
-	"github.com/inovacc/git-nerds/internal/git"
+	analysis2 "github.com/inovacc/git-nerds/internal/analysis"
+	git2 "github.com/inovacc/git-nerds/internal/git"
 )
 
 // Repository provides access to Git repository statistics and analysis
 type Repository struct {
 	path    string
 	options *Options
-	backend git.Backend
+	backend git2.Backend
 }
 
 // Open opens a Git repository at the specified path
@@ -54,7 +54,7 @@ func Open(path string, opts ...*Options) (*Repository, error) {
 	}
 
 	// Create backend
-	backend, err := git.NewExecBackend(absPath)
+	backend, err := git2.NewExecBackend(absPath)
 	if err != nil {
 		return nil, err
 	}
@@ -77,8 +77,8 @@ func (r *Repository) Options() *Options {
 }
 
 // toLogOptions converts Options to git.LogOptions
-func (r *Repository) toLogOptions() *git.LogOptions {
-	return &git.LogOptions{
+func (r *Repository) toLogOptions() *git2.LogOptions {
+	return &git2.LogOptions{
 		Since:         r.options.Since,
 		Until:         r.options.Until,
 		Author:        "",
@@ -98,9 +98,8 @@ func (r *Repository) DetailedStats() (*Stats, error) {
 	logOpts := r.toLogOptions()
 
 	// Create analyzers
-	authorAnalyzer := analysis.NewAuthorAnalyzer(r.backend, logOpts)
-	temporalAnalyzer := analysis.NewTemporalAnalyzer(r.backend, logOpts)
-	branchAnalyzer := analysis.NewBranchAnalyzer(r.backend, logOpts)
+	authorAnalyzer := analysis2.NewAuthorAnalyzer(r.backend, logOpts)
+	branchAnalyzer := analysis2.NewBranchAnalyzer(r.backend, logOpts)
 
 	// Get author details
 	authors, err := authorAnalyzer.DetailedAuthorStats()
@@ -168,7 +167,7 @@ func (r *Repository) StatsByBranch(branch string) (*Stats, error) {
 // Contributors returns all contributors
 func (r *Repository) Contributors() ([]Contributor, error) {
 	logOpts := r.toLogOptions()
-	analyzer := analysis.NewAuthorAnalyzer(r.backend, logOpts)
+	analyzer := analysis2.NewAuthorAnalyzer(r.backend, logOpts)
 
 	authors, err := analyzer.DetailedAuthorStats()
 	if err != nil {
@@ -191,7 +190,7 @@ func (r *Repository) Contributors() ([]Contributor, error) {
 // NewContributors returns new contributors since a given date
 func (r *Repository) NewContributors(since time.Time) ([]Contributor, error) {
 	logOpts := r.toLogOptions()
-	analyzer := analysis.NewAuthorAnalyzer(r.backend, logOpts)
+	analyzer := analysis2.NewAuthorAnalyzer(r.backend, logOpts)
 
 	authors, err := analyzer.NewContributors(since)
 	if err != nil {
@@ -214,63 +213,63 @@ func (r *Repository) NewContributors(since time.Time) ([]Contributor, error) {
 // CommitsPerAuthor returns commit counts by author
 func (r *Repository) CommitsPerAuthor() (map[string]int, error) {
 	logOpts := r.toLogOptions()
-	analyzer := analysis.NewAuthorAnalyzer(r.backend, logOpts)
+	analyzer := analysis2.NewAuthorAnalyzer(r.backend, logOpts)
 	return analyzer.CommitsPerAuthor()
 }
 
 // SuggestReviewers suggests reviewers for a file based on history
 func (r *Repository) SuggestReviewers(file string) ([]string, error) {
 	logOpts := r.toLogOptions()
-	analyzer := analysis.NewAuthorAnalyzer(r.backend, logOpts)
+	analyzer := analysis2.NewAuthorAnalyzer(r.backend, logOpts)
 	return analyzer.SuggestReviewers(file, 5) // Top 5 reviewers
 }
 
 // CommitsByDay returns commits grouped by day
 func (r *Repository) CommitsByDay() (map[string]int, error) {
 	logOpts := r.toLogOptions()
-	analyzer := analysis.NewTemporalAnalyzer(r.backend, logOpts)
+	analyzer := analysis2.NewTemporalAnalyzer(r.backend, logOpts)
 	return analyzer.CommitsByDay()
 }
 
 // CommitsByMonth returns commits grouped by month
 func (r *Repository) CommitsByMonth() (map[string]int, error) {
 	logOpts := r.toLogOptions()
-	analyzer := analysis.NewTemporalAnalyzer(r.backend, logOpts)
+	analyzer := analysis2.NewTemporalAnalyzer(r.backend, logOpts)
 	return analyzer.CommitsByMonth()
 }
 
 // CommitsByYear returns commits grouped by year
 func (r *Repository) CommitsByYear() (map[string]int, error) {
 	logOpts := r.toLogOptions()
-	analyzer := analysis.NewTemporalAnalyzer(r.backend, logOpts)
+	analyzer := analysis2.NewTemporalAnalyzer(r.backend, logOpts)
 	return analyzer.CommitsByYear()
 }
 
 // CommitsByWeekday returns commits grouped by weekday
 func (r *Repository) CommitsByWeekday() (map[string]int, error) {
 	logOpts := r.toLogOptions()
-	analyzer := analysis.NewTemporalAnalyzer(r.backend, logOpts)
+	analyzer := analysis2.NewTemporalAnalyzer(r.backend, logOpts)
 	return analyzer.CommitsByWeekday()
 }
 
 // CommitsByHour returns commits grouped by hour
 func (r *Repository) CommitsByHour() (map[int]int, error) {
 	logOpts := r.toLogOptions()
-	analyzer := analysis.NewTemporalAnalyzer(r.backend, logOpts)
+	analyzer := analysis2.NewTemporalAnalyzer(r.backend, logOpts)
 	return analyzer.CommitsByHour()
 }
 
 // CommitsByTimezone returns commits grouped by timezone
 func (r *Repository) CommitsByTimezone() (map[string]int, error) {
 	logOpts := r.toLogOptions()
-	analyzer := analysis.NewTemporalAnalyzer(r.backend, logOpts)
+	analyzer := analysis2.NewTemporalAnalyzer(r.backend, logOpts)
 	return analyzer.CommitsByTimezone()
 }
 
 // BranchTree returns the branch tree structure
 func (r *Repository) BranchTree() (*Tree, error) {
 	logOpts := r.toLogOptions()
-	analyzer := analysis.NewBranchAnalyzer(r.backend, logOpts)
+	analyzer := analysis2.NewBranchAnalyzer(r.backend, logOpts)
 
 	treeOutput, err := analyzer.BranchTree()
 	if err != nil {
@@ -287,7 +286,7 @@ func (r *Repository) BranchTree() (*Tree, error) {
 // BranchesByDate returns branches sorted by date
 func (r *Repository) BranchesByDate() ([]Branch, error) {
 	logOpts := r.toLogOptions()
-	analyzer := analysis.NewBranchAnalyzer(r.backend, logOpts)
+	analyzer := analysis2.NewBranchAnalyzer(r.backend, logOpts)
 
 	branches, err := analyzer.BranchesByDate()
 	if err != nil {
@@ -311,7 +310,7 @@ func (r *Repository) BranchesByDate() ([]Branch, error) {
 // CommitsCalendar returns a calendar heatmap of commits
 func (r *Repository) CommitsCalendar(author string) (*Calendar, error) {
 	logOpts := r.toLogOptions()
-	analyzer := analysis.NewTemporalAnalyzer(r.backend, logOpts)
+	analyzer := analysis2.NewTemporalAnalyzer(r.backend, logOpts)
 
 	year := time.Now().Year()
 	calData, err := analyzer.GenerateCalendar(year, author)
@@ -338,7 +337,7 @@ func (r *Repository) CommitsCalendar(author string) (*Calendar, error) {
 // CommitsHeatmap returns a heatmap of commits for the last N days
 func (r *Repository) CommitsHeatmap(days int) (*Heatmap, error) {
 	logOpts := r.toLogOptions()
-	analyzer := analysis.NewTemporalAnalyzer(r.backend, logOpts)
+	analyzer := analysis2.NewTemporalAnalyzer(r.backend, logOpts)
 
 	heatData, err := analyzer.GenerateHeatmap(days)
 	if err != nil {
